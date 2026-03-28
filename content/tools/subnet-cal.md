@@ -1,8 +1,8 @@
 ---
 title: "Subnet Calculator"
 description: "A lightweight browser-based utility for subnet and IP calculations."
-link: "/tools/subnet_cal/"
+link: "/apps/subnet-cal/"
 weight: 2
 ---
 
-A simple tool for quick subnet and address calculations.
+A simple browser-based subnet utility published through Poineix.
