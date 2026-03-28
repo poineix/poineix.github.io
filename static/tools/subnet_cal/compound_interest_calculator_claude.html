@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>복리 계산기</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --card2: #1e2130;
+    --border: #2a2d3e;
+    --accent: #6366f1;
+    --accent2: #818cf8;
+    --accent3: #a5b4fc;
+    --green: #22c55e;
+    --yellow: #f59e0b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --input-bg: #12151e;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px 48px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--accent3), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.875rem;
+    margin-bottom: 32px;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 700px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+
+  .card-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  .field {
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  input, select {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 0.95rem;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+  }
+
+  input::placeholder { color: var(--border); }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+    cursor: pointer;
+  }
+
+  select option { background: var(--card); }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 480px) {
+    .results-grid { grid-template-columns: 1fr; }
+  }
+
+  .stat {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .stat-value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+
+  .stat-value.green { color: var(--green); }
+  .stat-value.accent { color: var(--accent3); }
+  .stat-value.yellow { color: var(--yellow); }
+
+  .stat.featured {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(129,140,248,0.08));
+    border-color: rgba(99,102,241,0.4);
+  }
+
+  .stat.featured .stat-value {
+    font-size: 1.4rem;
+    color: var(--accent3);
+  }
+
+  /* Chart */
+  .chart-section {
+    margin-bottom: 20px;
+  }
+
+  .chart-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 7px;
+  }
+
+  .bar-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    width: 34px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .bar-track {
+    flex: 1;
+    height: 20px;
+    background: var(--input-bg);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .bar-principal {
+    position: absolute;
+    left: 0; top: 0; height: 100%;
+    background: linear-gradient(90deg, #4f46e5, #6366f1);
+    border-radius: 4px 0 0 4px;
+    transition: width 0.4s cubic-bezier(.4,0,.2,1);
+  }
+
+  .bar-contribution {
+    position: absolute;
+    top: 0; height: 100%;
+    background: linear-gradient(90deg, #7c3aed, #9333ea);
+    transition: left 0.4s cubic-bezier(.4,0,.2,1), width 0.4s cubic-bezier(.4,0,.2,1);
+  }
+
+  .bar-interest {
+    position: absolute;
+    top: 0; height: 100%;
+    background: linear-gradient(90deg, #16a34a, #22c55e);
+    border-radius: 0 4px 4px 0;
+    transition: left 0.4s cubic-bezier(.4,0,.2,1), width 0.4s cubic-bezier(.4,0,.2,1);
+  }
+
+  .bar-amount {
+    font-size: 0.72rem;
+    color: var(--muted);
+    width: 80px;
+    text-align: right;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* Table */
+  .table-wrap {
+    overflow-x: auto;
+    margin-top: 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    min-width: 480px;
+  }
+
+  thead th {
+    background: var(--card2);
+    padding: 10px 12px;
+    text-align: right;
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  thead th:first-child { text-align: center; }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(42,45,62,0.6);
+    transition: background 0.15s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(99,102,241,0.06); }
+
+  tbody td {
+    padding: 9px 12px;
+    text-align: right;
+    color: var(--text);
+  }
+
+  tbody td:first-child {
+    text-align: center;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  tbody td.profit { color: var(--green); }
+
+  .full-width { grid-column: 1 / -1; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>복리 계산기</h1>
+  <p class="subtitle">투자 원금, 납입금, 이자를 한눈에 확인하세요</p>
+
+  <div class="grid">
+    <!-- Inputs -->
+    <div class="card">
+      <div class="card-title">투자 설정</div>
+
+      <div class="field">
+        <label>초기 투자금 (원)</label>
+        <input type="number" id="principal" value="10000000" min="0" step="100000" placeholder="10,000,000">
+      </div>
+
+      <div class="field">
+        <label>연 이자율 (%)</label>
+        <input type="number" id="rate" value="7" min="0" max="100" step="0.1" placeholder="7">
+      </div>
+
+      <div class="field">
+        <label>투자 기간 (년)</label>
+        <input type="number" id="years" value="20" min="1" max="100" step="1" placeholder="20">
+      </div>
+
+      <div class="field">
+        <label>복리 주기</label>
+        <select id="freq">
+          <option value="1">연복리 (1회/년)</option>
+          <option value="2">반기복리 (2회/년)</option>
+          <option value="4">분기복리 (4회/년)</option>
+          <option value="12" selected>월복리 (12회/년)</option>
+          <option value="365">일복리 (365회/년)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>월 추가 납입금 (원)</label>
+        <input type="number" id="monthly" value="500000" min="0" step="100000" placeholder="500,000">
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="card">
+      <div class="card-title">계산 결과</div>
+      <div class="results-grid">
+        <div class="stat featured">
+          <div class="stat-label">최종 금액</div>
+          <div class="stat-value accent" id="out-final">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">총 납입 원금</div>
+          <div class="stat-value" id="out-principal">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">총 수익 (이자)</div>
+          <div class="stat-value green" id="out-profit">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">수익률</div>
+          <div class="stat-value yellow" id="out-rate">—</div>
+        </div>
+        <div class="stat featured">
+          <div class="stat-label">CAGR (연평균 성장률)</div>
+          <div class="stat-value accent" id="out-cagr">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="card full-width">
+      <div class="chart-section">
+        <div class="chart-title">연도별 자산 구성</div>
+        <div id="chart"></div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#6366f1"></div>초기 원금</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#9333ea"></div>추가 납입금</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>이자 수익</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card full-width">
+      <div class="card-title">연도별 상세 내역</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>연도</th>
+              <th>총 납입 원금</th>
+              <th>누적 이자</th>
+              <th>연간 이자</th>
+              <th>최종 금액</th>
+              <th>수익률</th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const fmt = v => Math.round(v).toLocaleString('ko-KR') + '원';
+  const fmtPct = v => v.toFixed(2) + '%';
+
+  function calc() {
+    const P = parseFloat(document.getElementById('principal').value) || 0;
+    const r = parseFloat(document.getElementById('rate').value) / 100 || 0;
+    const Y = parseInt(document.getElementById('years').value) || 1;
+    const n = parseInt(document.getElementById('freq').value) || 12;
+    const M = parseFloat(document.getElementById('monthly').value) || 0;
+
+    const rn = r / n;
+    const rows = [];
+
+    let balance = P;
+    let totalContrib = P;
+
+    for (let y = 1; y <= Y; y++) {
+      const prevBalance = balance;
+      // Simulate n periods per year
+      for (let p = 0; p < n; p++) {
+        balance = balance * (1 + rn) + M * (12 / n);
+      }
+      totalContrib = P + M * 12 * y;
+      const totalInterest = balance - totalContrib;
+      const yearlyInterest = balance - prevBalance - M * 12;
+      const returnRate = totalContrib > 0 ? (balance - totalContrib) / totalContrib * 100 : 0;
+
+      rows.push({
+        year: y,
+        balance,
+        totalContrib,
+        totalInterest,
+        yearlyInterest,
+        returnRate
+      });
+    }
+
+    const last = rows[rows.length - 1];
+    const finalAmt = last.balance;
+    const totalPrincipal = last.totalContrib;
+    const totalProfit = last.totalInterest;
+    const totalReturn = totalPrincipal > 0 ? totalProfit / totalPrincipal * 100 : 0;
+    const cagr = P > 0 || M > 0
+      ? (Math.pow(finalAmt / totalPrincipal, 1 / Y) - 1) * 100
+      : 0;
+
+    // Update stats
+    document.getElementById('out-final').textContent = fmt(finalAmt);
+    document.getElementById('out-principal').textContent = fmt(totalPrincipal);
+    document.getElementById('out-profit').textContent = fmt(totalProfit);
+    document.getElementById('out-rate').textContent = fmtPct(totalReturn);
+    document.getElementById('out-cagr').textContent = fmtPct(cagr);
+
+    // Chart
+    const maxVal = finalAmt;
+    const chartEl = document.getElementById('chart');
+    const step = Math.max(1, Math.floor(Y / 20));
+    const chartRows = rows.filter((r, i) => (i + 1) % step === 0 || i === rows.length - 1);
+
+    chartEl.innerHTML = chartRows.map(row => {
+      const pct = (v) => (v / maxVal * 100).toFixed(2) + '%';
+      const principalW = Math.min(P / maxVal, 1);
+      const contribW = Math.min(Math.max(row.totalContrib - P, 0) / maxVal, 1);
+      const interestW = Math.min(Math.max(row.totalInterest, 0) / maxVal, 1);
+      const contribLeft = principalW * 100;
+      const interestLeft = (principalW + contribW) * 100;
+
+      const amtShort = row.balance >= 1e8
+        ? (row.balance / 1e8).toFixed(1) + '억'
+        : (row.balance / 1e4).toFixed(0) + '만';
+
+      return `<div class="bar-row">
+        <span class="bar-label">${row.year}년</span>
+        <div class="bar-track">
+          <div class="bar-principal" style="width:${principalW*100}%"></div>
+          <div class="bar-contribution" style="left:${contribLeft}%;width:${contribW*100}%"></div>
+          <div class="bar-interest" style="left:${interestLeft}%;width:${interestW*100}%"></div>
+        </div>
+        <span class="bar-amount">${amtShort}</span>
+      </div>`;
+    }).join('');
+
+    // Table
+    const tbody = document.getElementById('table-body');
+    tbody.innerHTML = rows.map(row => `
+      <tr>
+        <td>${row.year}</td>
+        <td>${fmt(row.totalContrib)}</td>
+        <td class="profit">${fmt(row.totalInterest)}</td>
+        <td class="profit">${fmt(row.yearlyInterest)}</td>
+        <td>${fmt(row.balance)}</td>
+        <td class="profit">${fmtPct(row.returnRate)}</td>
+      </tr>
+    `).join('');
+  }
+
+  ['principal','rate','years','freq','monthly'].forEach(id => {
+    document.getElementById(id).addEventListener('input', calc);
+  });
+
+  calc();
+</script>
+</body>
+</html>
