@@ -1,0 +1,13 @@
+{{ define "main" }}
+<section class="section">
+  <div class="container narrow">
+    <p class="eyebrow">{{ .Section | title }}</p>
+    <h1>{{ .Title }}</h1>
+    {{ with .Params.description }}<p class="lead">{{ . }}</p>{{ end }}
+    <div class="page-content">{{ .Content }}</div>
+    {{ with .Params.link }}
+    <p><a class="btn btn-primary" href="{{ . }}">Open this tool</a></p>
+    {{ end }}
+  </div>
+</section>
+{{ end }}

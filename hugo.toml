@@ -1,0 +1,9 @@
+baseURL = 'https://poineix.github.io/'
+languageCode = 'en-us'
+title = 'Poineix'
+defaultContentLanguage = 'en'
+enableRobotsTXT = true
+
+[params]
+  description = 'A collection of practical browser-based tools and experiments.'
+  author = 'Poineix'
