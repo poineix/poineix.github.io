@@ -1,7 +1,7 @@
 ---
 title: "Compound Interest Calculator"
 description: "Estimate growth with recurring contributions and annual return assumptions."
-link: "/tools/compound-interest/"
+link: "/apps/compound-interest/"
 weight: 1
 ---
 
