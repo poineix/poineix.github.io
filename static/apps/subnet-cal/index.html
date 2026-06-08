@@ -5,527 +5,534 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Subnet Mask 계산기</title>
   <style>
+    :root {
+      --bg-1: #0a0f1d;
+      --bg-2: #0d1326;
+      --panel: rgba(255,255,255,0.03);
+      --panel-solid: #121a31;
+      --line: rgba(255,255,255,0.09);
+      --line-strong: rgba(255,255,255,0.16);
+      --text: #eef2ff;
+      --muted: #9fb0d6;
+      --faint: #6b7aa3;
+      --accent: #7c9cff;
+      --accent-2: #9b7cff;
+      --grad: linear-gradient(135deg, #7c9cff, #9b7cff);
+      --green: #5be3a7;
+      --orange: #ffb27c;
+      --pink: #ff9ad1;
+      --shadow: 0 24px 60px rgba(0,0,0,0.35);
+      --mono: 'SFMono-Regular', 'Consolas', 'Menlo', monospace;
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif;
+      background:
+        radial-gradient(900px 500px at 15% -10%, rgba(124,156,255,0.14), transparent 60%),
+        radial-gradient(800px 500px at 95% 0%, rgba(155,124,255,0.12), transparent 55%),
+        linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+      background-attachment: fixed;
+      color: var(--text);
       min-height: 100vh;
-      padding: 24px;
+      padding: 40px 20px 64px;
+      line-height: 1.6;
     }
+    .wrap { width: min(1120px, 100%); margin: 0 auto; }
 
-    h1 {
-      text-align: center;
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: #38bdf8;
-      margin-bottom: 6px;
-      letter-spacing: 0.5px;
+    /* ── 헤더 ── */
+    header { text-align: center; margin-bottom: 36px; }
+    .eyebrow {
+      display: inline-block;
+      color: #bfd0ff;
+      background: rgba(124,156,255,0.12);
+      border: 1px solid rgba(124,156,255,0.24);
+      padding: 6px 12px; border-radius: 999px;
+      font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700;
+      margin-bottom: 16px;
     }
-    .subtitle {
-      text-align: center;
-      color: #94a3b8;
-      font-size: 0.85rem;
-      margin-bottom: 28px;
+    h1 {
+      font-size: clamp(1.9rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      background: var(--grad);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle { color: var(--muted); font-size: 0.95rem; margin-top: 10px; }
+
+    /* ── 패널 공통 ── */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
     }
 
     /* ── 입력 패널 ── */
-    .input-panel {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      padding: 20px 24px;
-      max-width: 720px;
-      margin: 0 auto 28px;
-    }
+    .input-panel { padding: 24px; margin-bottom: 24px; }
     .input-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: flex-end;
+      display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
     }
-    .input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
+    .input-group { display: flex; flex-direction: column; gap: 7px; flex: 1 1 200px; }
     .input-group label {
-      font-size: 0.78rem;
-      color: #94a3b8;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      font-size: 0.72rem; color: var(--muted); font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.06em;
     }
     .input-group input, .input-group select {
-      background: #0f172a;
-      border: 1px solid #475569;
-      border-radius: 8px;
-      color: #e2e8f0;
-      padding: 9px 14px;
-      font-size: 0.95rem;
-      font-family: 'Consolas', monospace;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--line-strong);
+      border-radius: 12px;
+      color: var(--text);
+      padding: 12px 15px;
+      font-size: 0.98rem;
+      font-family: var(--mono);
       outline: none;
-      transition: border-color 0.2s;
+      width: 100%;
+      transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
     }
+    .input-group input::placeholder { color: var(--faint); }
     .input-group input:focus, .input-group select:focus {
-      border-color: #38bdf8;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(124,156,255,0.18);
+      background: rgba(0,0,0,0.35);
     }
-    .input-group input { width: 200px; }
-    .input-group select { width: 200px; cursor: pointer; }
-
+    .input-group select { cursor: pointer; }
     .btn {
-      padding: 10px 24px;
-      border-radius: 8px;
-      border: none;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
+      padding: 12px 22px; border-radius: 12px; border: 1px solid transparent;
+      font-size: 0.92rem; font-weight: 700; cursor: pointer;
+      transition: transform 0.1s, filter 0.18s, background 0.18s, border-color 0.18s;
+      white-space: nowrap;
     }
     .btn:active { transform: scale(0.97); }
-    .btn-primary { background: #0ea5e9; color: #fff; }
-    .btn-primary:hover { background: #38bdf8; }
-    .btn-secondary { background: #334155; color: #cbd5e1; }
-    .btn-secondary:hover { background: #475569; }
-
-    /* ── 결과 카드 ── */
-    .result-panel {
-      max-width: 720px;
-      margin: 0 auto 28px;
+    .btn-secondary {
+      background: rgba(255,255,255,0.04); color: var(--muted); border-color: var(--line-strong);
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.09); color: var(--text); }
+    .hint {
+      margin-top: 14px; font-size: 0.8rem; color: var(--faint);
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .hint kbd {
+      font-family: var(--mono); font-size: 0.72rem;
+      background: rgba(255,255,255,0.06); border: 1px solid var(--line-strong);
+      border-radius: 6px; padding: 2px 7px; color: var(--muted);
+    }
+    .error-msg {
+      color: #ff9a9a; background: rgba(180,40,40,0.14); border: 1px solid rgba(220,80,80,0.35);
+      border-radius: 12px; padding: 11px 16px; margin-top: 14px; font-size: 0.88rem;
       display: none;
     }
-    .result-panel.show { display: block; }
+    .error-msg.show { display: block; }
+
+    /* ── 결과 ── */
+    .result-panel { display: none; }
+    .result-panel.show { display: block; animation: rise 0.35s ease; }
+    @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
     .result-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 12px;
-      margin-bottom: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
     }
     .card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 10px;
-      padding: 14px 18px;
+      position: relative;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px 18px;
+      cursor: pointer;
+      transition: border-color 0.18s, transform 0.12s, background 0.18s;
+    }
+    .card:hover { border-color: var(--line-strong); transform: translateY(-2px); background: rgba(255,255,255,0.05); }
+    .card:hover .copy-ico { opacity: 1; }
+    .copy-ico {
+      position: absolute; top: 12px; right: 14px; font-size: 0.75rem;
+      color: var(--faint); opacity: 0; transition: opacity 0.18s;
     }
     .card .label {
-      font-size: 0.72rem;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      font-weight: 600;
-      margin-bottom: 6px;
+      font-size: 0.7rem; color: var(--muted); text-transform: uppercase;
+      letter-spacing: 0.06em; font-weight: 700; margin-bottom: 8px;
     }
-    .card .value {
-      font-size: 1.05rem;
-      font-family: 'Consolas', monospace;
-      color: #f1f5f9;
-      font-weight: 600;
-    }
-    .card.highlight { border-color: #0ea5e9; background: #0c2340; }
-    .card.highlight .value { color: #38bdf8; font-size: 1.3rem; }
-    .card.green { border-color: #22c55e; background: #052e16; }
-    .card.green .value { color: #4ade80; }
-    .card.orange { border-color: #f97316; background: #2c1206; }
-    .card.orange .value { color: #fb923c; }
-    .card.purple { border-color: #a855f7; background: #1a0a2e; }
-    .card.purple .value { color: #c084fc; }
+    .card .value { font-size: 1.08rem; font-family: var(--mono); color: var(--text); font-weight: 600; word-break: break-all; }
+    .card.highlight { background: linear-gradient(135deg, rgba(124,156,255,0.16), rgba(155,124,255,0.12)); border-color: rgba(124,156,255,0.4); }
+    .card.highlight .value { font-size: 1.3rem; background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .card.green   .value { color: var(--green); }
+    .card.orange  .value { color: var(--orange); }
+    .card.pink    .value { color: var(--pink); }
 
-    /* 비트맵 */
-    .bitmap-wrap {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 10px;
-      padding: 16px 20px;
-      margin-bottom: 20px;
-      overflow-x: auto;
-    }
+    /* ── 비트맵 ── */
+    .bitmap-wrap { padding: 22px 24px; margin-bottom: 24px; overflow-x: auto; }
     .bitmap-title {
-      font-size: 0.78rem;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      font-weight: 600;
-      margin-bottom: 10px;
+      font-size: 0.72rem; color: var(--muted); text-transform: uppercase;
+      letter-spacing: 0.06em; font-weight: 700; margin-bottom: 16px;
     }
-    .bitmap {
-      display: flex;
-      gap: 2px;
-      flex-wrap: nowrap;
-    }
-    .bit-group {
-      display: flex;
-      gap: 2px;
-      margin-right: 8px;
-    }
+    .bitrow { margin-bottom: 18px; }
+    .bitrow:last-child { margin-bottom: 0; }
+    .bitrow-label { font-size: 0.78rem; color: var(--muted); margin-bottom: 7px; font-weight: 600; }
+    .bitrow-label .mono { font-family: var(--mono); color: var(--text); }
+    .bits { display: flex; gap: 3px; flex-wrap: nowrap; }
+    .bit-group { display: flex; flex-direction: column; gap: 4px; margin-right: 10px; }
+    .bit-group:last-child { margin-right: 0; }
+    .bit-octet { display: flex; gap: 3px; }
     .bit {
-      width: 22px;
-      height: 28px;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.8rem;
-      font-family: 'Consolas', monospace;
-      font-weight: 700;
-      transition: background 0.3s;
+      width: 23px; height: 30px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.78rem; font-family: var(--mono); font-weight: 700;
+      transition: background 0.3s, color 0.3s;
     }
-    .bit.one  { background: #0ea5e9; color: #fff; }
-    .bit.zero { background: #1e3a5f; color: #64748b; }
+    /* 마스크 */
+    .bit.m-net  { background: linear-gradient(135deg, #7c9cff, #9b7cff); color: #fff; }
+    .bit.m-host { background: rgba(255,255,255,0.05); color: var(--faint); border: 1px solid var(--line); }
+    /* IP: 네트워크부 / 호스트부 */
+    .bit.ip-net  { background: rgba(124,156,255,0.22); color: #cdd9ff; border: 1px solid rgba(124,156,255,0.4); }
+    .bit.ip-host { background: rgba(255,178,124,0.16); color: var(--orange); border: 1px solid rgba(255,178,124,0.3); }
+    .oct-dec {
+      font-size: 0.7rem; color: var(--faint); text-align: center; margin-top: 5px; font-family: var(--mono);
+    }
+    .legend { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 16px; font-size: 0.78rem; color: var(--muted); }
+    .legend span { display: inline-flex; align-items: center; gap: 7px; }
+    .swatch { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+    .sw-net  { background: linear-gradient(135deg, #7c9cff, #9b7cff); }
+    .sw-host { background: rgba(255,178,124,0.4); border: 1px solid rgba(255,178,124,0.5); }
+    .sw-mhost{ background: rgba(255,255,255,0.06); border: 1px solid var(--line-strong); }
 
-    .octet-labels {
-      display: flex;
-      gap: 2px;
-      margin-bottom: 4px;
-    }
-    .octet-label {
-      width: 22px;
-      text-align: center;
-      font-size: 0.6rem;
-      color: #475569;
-    }
-    .octet-label.gap { width: 10px; }
-
-    /* ── 전체 테이블 ── */
-    .table-panel {
-      max-width: 1100px;
-      margin: 0 auto;
-    }
+    /* ── 참조표 ── */
+    .table-panel { padding: 22px 24px; }
     .table-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #94a3b8;
-      margin-bottom: 12px;
-      padding-left: 4px;
+      font-size: 0.85rem; font-weight: 700; color: var(--muted); margin-bottom: 14px;
+      text-transform: uppercase; letter-spacing: 0.04em;
     }
-    .tbl-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid #334155; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.82rem;
-    }
-    thead tr {
-      background: #1e293b;
-    }
+    .tbl-wrap { overflow-x: auto; border-radius: 14px; border: 1px solid var(--line); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    thead tr { background: rgba(255,255,255,0.03); }
     thead th {
-      padding: 10px 14px;
-      text-align: left;
-      color: #64748b;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      border-bottom: 1px solid #334155;
-      white-space: nowrap;
+      padding: 12px 14px; text-align: left; color: var(--muted); font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.7rem;
+      border-bottom: 1px solid var(--line); white-space: nowrap;
     }
-    tbody tr {
-      border-bottom: 1px solid #1e293b;
-      transition: background 0.15s;
-      cursor: pointer;
-    }
-    tbody tr:hover { background: #1e293b; }
-    tbody tr.active { background: #0c2340 !important; }
-    tbody tr.active td { color: #38bdf8; }
-    tbody td {
-      padding: 9px 14px;
-      font-family: 'Consolas', monospace;
-      color: #cbd5e1;
-      white-space: nowrap;
-    }
-    tbody td:first-child { color: #38bdf8; font-weight: 700; }
+    tbody tr { border-bottom: 1px solid var(--line); transition: background 0.15s; cursor: pointer; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,0.04); }
+    tbody tr.active { background: linear-gradient(135deg, rgba(124,156,255,0.16), rgba(155,124,255,0.1)) !important; }
+    tbody td { padding: 10px 14px; font-family: var(--mono); color: var(--muted); white-space: nowrap; }
     .cidr-badge {
-      display: inline-block;
-      background: #0ea5e922;
-      color: #38bdf8;
-      border: 1px solid #0ea5e944;
-      border-radius: 4px;
-      padding: 2px 8px;
-      font-size: 0.78rem;
-      font-weight: 700;
+      display: inline-block; background: rgba(124,156,255,0.14); color: #bfd0ff;
+      border: 1px solid rgba(124,156,255,0.3); border-radius: 6px;
+      padding: 2px 9px; font-size: 0.78rem; font-weight: 700;
     }
-    .bar-wrap {
-      width: 80px;
-      height: 8px;
-      background: #1e3a5f;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    .bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #0ea5e9, #22d3ee);
-      border-radius: 4px;
-    }
-    .tag {
-      display: inline-block;
-      padding: 1px 7px;
-      border-radius: 4px;
-      font-size: 0.72rem;
-      font-weight: 600;
-    }
-    .tag-a { background: #7c3aed22; color: #a78bfa; border: 1px solid #7c3aed44; }
-    .tag-b { background: #0ea5e922; color: #38bdf8; border: 1px solid #0ea5e944; }
-    .tag-c { background: #22c55e22; color: #4ade80; border: 1px solid #22c55e44; }
-    .tag-host { background: #f9731622; color: #fb923c; border: 1px solid #f9731644; }
-    .tag-lo { background: #64748b22; color: #94a3b8; border: 1px solid #64748b44; }
+    .bar-wrap { width: 84px; height: 8px; background: rgba(255,255,255,0.07); border-radius: 999px; overflow: hidden; }
+    .bar-fill { height: 100%; background: var(--grad); border-radius: 999px; }
+    .tag { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; }
+    .tag-a    { background: rgba(155,124,255,0.16); color: #c4b1ff; border: 1px solid rgba(155,124,255,0.3); }
+    .tag-b    { background: rgba(124,156,255,0.16); color: #bfd0ff; border: 1px solid rgba(124,156,255,0.3); }
+    .tag-c    { background: rgba(91,227,167,0.14); color: var(--green); border: 1px solid rgba(91,227,167,0.3); }
+    .tag-host { background: rgba(255,178,124,0.14); color: var(--orange); border: 1px solid rgba(255,178,124,0.3); }
+    .tag-lo   { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid var(--line-strong); }
 
-    .error-msg {
-      color: #f87171;
-      background: #2c1212;
-      border: 1px solid #7f1d1d;
-      border-radius: 8px;
-      padding: 10px 16px;
-      margin-top: 10px;
-      font-size: 0.88rem;
-    }
-    .info-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      margin-top: 10px;
-    }
+    .info-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 24px; }
     .info-badge {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 20px;
-      padding: 3px 12px;
-      font-size: 0.78rem;
-      color: #94a3b8;
+      background: var(--panel); border: 1px solid var(--line); border-radius: 999px;
+      padding: 7px 15px; font-size: 0.8rem; color: var(--muted);
+    }
+    .info-badge strong { color: var(--text); font-family: var(--mono); font-weight: 700; }
+
+    /* ── 토스트 ── */
+    #toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--panel-solid); border: 1px solid var(--line-strong);
+      color: var(--text); padding: 11px 20px; border-radius: 999px;
+      font-size: 0.88rem; font-weight: 600; box-shadow: var(--shadow);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s; z-index: 50;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 600px) {
+      body { padding: 28px 14px 48px; }
+      .input-group { flex-basis: 100%; }
+      .btn { flex: 1; }
     }
   </style>
 </head>
 <body>
+<div class="wrap">
 
-<h1>🌐 Subnet Mask 계산기</h1>
-<p class="subtitle">IP 주소와 CIDR(또는 서브넷 마스크)를 입력하거나, 아래 전체 표에서 행을 클릭하세요.</p>
+  <header>
+    <span class="eyebrow">Network Tool</span>
+    <h1>Subnet Mask 계산기</h1>
+    <p class="subtitle">IP·CIDR을 입력하면 실시간으로 계산돼요. 아래 표의 행을 클릭하거나, 결과 카드를 눌러 값을 복사하세요.</p>
+  </header>
 
-<!-- 입력 패널 -->
-<div class="input-panel">
-  <div class="input-row">
-    <div class="input-group">
-      <label>IP 주소</label>
-      <input type="text" id="ipInput" placeholder="예) 192.168.1.100" value="192.168.1.100">
+  <!-- 입력 -->
+  <div class="panel input-panel">
+    <div class="input-row">
+      <div class="input-group">
+        <label>IP 주소 <span style="color:var(--faint);font-weight:400;text-transform:none;letter-spacing:0;">(/CIDR 붙여넣기 가능)</span></label>
+        <input type="text" id="ipInput" placeholder="예) 192.168.1.100 또는 192.168.1.100/24" value="192.168.1.100" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="input-group" style="flex:0 1 200px;">
+        <label>CIDR 접두사</label>
+        <select id="cidrSelect"></select>
+      </div>
+      <div class="input-group" style="flex:0 1 200px;">
+        <label>서브넷 마스크 직접입력</label>
+        <input type="text" id="maskInput" placeholder="예) 255.255.255.0" autocomplete="off" spellcheck="false">
+      </div>
+      <button class="btn btn-secondary" onclick="reset()">초기화</button>
     </div>
-    <div class="input-group">
-      <label>CIDR 접두사</label>
-      <select id="cidrSelect">
-        <!-- JS로 채움 -->
-      </select>
+    <div class="hint">
+      <span><kbd>Enter</kbd> 로 계산 · 입력 중 자동 갱신 · 결과 카드 <kbd>클릭</kbd> 시 복사</span>
     </div>
-    <div class="input-group">
-      <label>서브넷 마스크 직접입력</label>
-      <input type="text" id="maskInput" placeholder="예) 255.255.255.0">
+    <div id="errorMsg" class="error-msg"></div>
+  </div>
+
+  <!-- 결과 -->
+  <div class="result-panel" id="resultPanel">
+    <div class="result-grid" id="resultGrid"></div>
+
+    <div class="info-row" id="infoRow"></div>
+
+    <div class="panel bitmap-wrap">
+      <div class="bitmap-title">32비트 구조 — IP 주소와 서브넷 마스크</div>
+      <div class="bitrow">
+        <div class="bitrow-label">IP 주소 · <span class="mono" id="ipBitLabel"></span></div>
+        <div class="bits" id="ipBits"></div>
+      </div>
+      <div class="bitrow">
+        <div class="bitrow-label">서브넷 마스크 · <span class="mono" id="maskBitLabel"></span></div>
+        <div class="bits" id="maskBits"></div>
+      </div>
+      <div class="legend">
+        <span><i class="swatch sw-net"></i> 네트워크 비트</span>
+        <span><i class="swatch sw-host"></i> 호스트 비트 (IP)</span>
+        <span><i class="swatch sw-mhost"></i> 호스트 비트 (마스크 0)</span>
+      </div>
     </div>
-    <button class="btn btn-primary" onclick="calculate()">계산</button>
-    <button class="btn btn-secondary" onclick="reset()">초기화</button>
   </div>
-  <div id="errorMsg" class="error-msg" style="display:none;"></div>
-</div>
 
-<!-- 결과 패널 -->
-<div class="result-panel" id="resultPanel">
-  <div class="result-grid" id="resultGrid"></div>
-  <div class="bitmap-wrap">
-    <div class="bitmap-title">서브넷 마스크 비트맵 (32비트)</div>
-    <div class="octet-labels" id="octetLabels"></div>
-    <div class="bitmap" id="bitmapRow"></div>
+  <!-- 참조표 -->
+  <div class="panel table-panel">
+    <div class="table-title">전체 CIDR 서브넷 참조표 — 행 클릭 시 상세 계산</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>CIDR</th><th>서브넷 마스크</th><th>네트워크 비트</th><th>호스트 비트</th>
+            <th>총 IP 수</th><th>사용 가능 호스트</th><th>네트워크 비율</th><th>클래스</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
   </div>
-  <div class="info-row" id="infoRow"></div>
-</div>
 
-<!-- 전체 CIDR 표 -->
-<div class="table-panel">
-  <div class="table-title">📋 전체 CIDR 서브넷 참조표 (클릭 시 상세 계산)</div>
-  <div class="tbl-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>CIDR</th>
-          <th>서브넷 마스크</th>
-          <th>네트워크 비트</th>
-          <th>호스트 비트</th>
-          <th>총 IP 수</th>
-          <th>사용 가능 호스트</th>
-          <th>사용 비율</th>
-          <th>클래스</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-  </div>
 </div>
+<div id="toast"></div>
 
 <script>
-// ─── 유틸 함수 ───────────────────────────────────────────────
+// ─── 유틸 ───────────────────────────────────────────────
 function ipToLong(ip) {
   const parts = ip.split('.');
   if (parts.length !== 4) return NaN;
   let n = 0;
   for (const p of parts) {
+    if (!/^\d+$/.test(p)) return NaN;
     const v = parseInt(p, 10);
-    if (isNaN(v) || v < 0 || v > 255) return NaN;
+    if (v < 0 || v > 255) return NaN;
     n = (n << 8) | v;
   }
   return n >>> 0;
 }
-
 function longToIp(n) {
   n = n >>> 0;
   return [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join('.');
 }
-
-function cidrToMask(cidr) {
-  if (cidr === 0) return 0;
-  return (0xffffffff << (32 - cidr)) >>> 0;
-}
-
+function cidrToMask(cidr) { return cidr === 0 ? 0 : (0xffffffff << (32 - cidr)) >>> 0; }
 function maskToCidr(mask) {
   let n = mask >>> 0, c = 0;
   while (n & 0x80000000) { c++; n = (n << 1) >>> 0; }
   return c;
 }
-
+function isValidMask(mask) {
+  // 1들이 MSB부터 연속이어야 유효한 마스크 → 와일드카드(~mask)가 2^k-1 꼴
+  const w = ~mask >>> 0;
+  return (w & (w + 1)) === 0;
+}
 function calcSubnet(ipLong, cidr) {
-  const mask    = cidrToMask(cidr);
+  const mask = cidrToMask(cidr);
   const network = (ipLong & mask) >>> 0;
   const broadcast = (network | (~mask >>> 0)) >>> 0;
   const firstHost = cidr < 31 ? (network + 1) >>> 0 : network;
-  const lastHost  = cidr < 31 ? (broadcast - 1) >>> 0 : broadcast;
-  const total     = Math.pow(2, 32 - cidr);
-  const usable    = cidr < 31 ? Math.max(0, total - 2) : total;
+  const lastHost = cidr < 31 ? (broadcast - 1) >>> 0 : broadcast;
+  const total = Math.pow(2, 32 - cidr);
+  const usable = cidr < 31 ? Math.max(0, total - 2) : total;
   return { mask, network, broadcast, firstHost, lastHost, total, usable };
 }
 
-// ─── CIDR 선택 드롭다운 초기화 ───────────────────────────────
+// ─── DOM 참조 ───────────────────────────────────────────
+const ipInput = document.getElementById('ipInput');
+const maskInput = document.getElementById('maskInput');
 const cidrSelect = document.getElementById('cidrSelect');
+
+// CIDR 드롭다운
 for (let i = 0; i <= 32; i++) {
   const opt = document.createElement('option');
   opt.value = i;
-  const mask = cidrToMask(i);
-  opt.textContent = `/${i}  (${longToIp(mask)})`;
+  opt.textContent = `/${i}  (${longToIp(cidrToMask(i))})`;
   if (i === 24) opt.selected = true;
   cidrSelect.appendChild(opt);
 }
 
-// 서브넷 마스크 입력 시 CIDR 자동 동기
-document.getElementById('maskInput').addEventListener('input', function() {
-  const m = ipToLong(this.value.trim());
-  if (!isNaN(m)) {
-    const c = maskToCidr(m);
-    cidrSelect.value = c;
+// ─── 동기화 핸들러 ──────────────────────────────────────
+let suppress = false; // 상호 업데이트 루프 방지
+
+ipInput.addEventListener('input', () => {
+  // "192.168.1.100/24" 형태 자동 분리
+  const v = ipInput.value;
+  const slash = v.indexOf('/');
+  if (slash !== -1) {
+    const c = parseInt(v.slice(slash + 1), 10);
+    ipInput.value = v.slice(0, slash).trim();
+    if (!isNaN(c) && c >= 0 && c <= 32) {
+      cidrSelect.value = c;
+      maskInput.value = longToIp(cidrToMask(c));
+    }
   }
+  calculate();
 });
-cidrSelect.addEventListener('change', function() {
-  const mask = cidrToMask(parseInt(this.value));
-  document.getElementById('maskInput').value = longToIp(mask);
+maskInput.addEventListener('input', () => {
+  const m = ipToLong(maskInput.value.trim());
+  if (!isNaN(m) && isValidMask(m)) {
+    suppress = true;
+    cidrSelect.value = maskToCidr(m);
+    suppress = false;
+  }
+  calculate();
 });
+cidrSelect.addEventListener('change', () => {
+  if (suppress) return;
+  maskInput.value = longToIp(cidrToMask(parseInt(cidrSelect.value)));
+  calculate();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Enter') calculate(); });
 
-// ─── 계산 ────────────────────────────────────────────────────
-function showError(msg) {
-  const el = document.getElementById('errorMsg');
-  el.textContent = msg;
-  el.style.display = 'block';
-}
-function hideError() {
-  document.getElementById('errorMsg').style.display = 'none';
-}
+// ─── 에러 ───────────────────────────────────────────────
+const errEl = document.getElementById('errorMsg');
+function showError(msg) { errEl.textContent = msg; errEl.classList.add('show'); document.getElementById('resultPanel').classList.remove('show'); }
+function hideError() { errEl.classList.remove('show'); }
 
+// ─── 계산 ───────────────────────────────────────────────
 function calculate(ipStr, cidr) {
   hideError();
   if (ipStr === undefined) {
-    ipStr = document.getElementById('ipInput').value.trim();
+    ipStr = ipInput.value.trim();
     cidr = parseInt(cidrSelect.value);
   }
-  if (!ipStr) { showError('IP 주소를 입력해주세요.'); return; }
+  if (!ipStr) { document.getElementById('resultPanel').classList.remove('show'); return; }
   const ipLong = ipToLong(ipStr);
-  if (isNaN(ipLong)) { showError('올바르지 않은 IP 주소 형식입니다.'); return; }
-  if (isNaN(cidr) || cidr < 0 || cidr > 32) { showError('CIDR 값이 잘못되었습니다.'); return; }
+  if (isNaN(ipLong)) { showError('올바르지 않은 IP 주소 형식입니다. 예) 192.168.1.100'); return; }
+  if (isNaN(cidr) || cidr < 0 || cidr > 32) { showError('CIDR 값이 잘못되었습니다 (0–32).'); return; }
 
-  const s = calcSubnet(ipLong, cidr);
-  renderResult(ipStr, ipLong, cidr, s);
+  renderResult(ipStr, ipLong, cidr, calcSubnet(ipLong, cidr));
 
-  // 테이블 행 강조
   document.querySelectorAll('#tableBody tr').forEach(tr => tr.classList.remove('active'));
   const row = document.querySelector(`#tableBody tr[data-cidr="${cidr}"]`);
-  if (row) { row.classList.add('active'); }
+  if (row) row.classList.add('active');
 }
 
 function reset() {
-  document.getElementById('ipInput').value = '192.168.1.100';
+  ipInput.value = '192.168.1.100';
   cidrSelect.value = 24;
-  document.getElementById('maskInput').value = '';
-  document.getElementById('resultPanel').classList.remove('show');
-  document.querySelectorAll('#tableBody tr').forEach(tr => tr.classList.remove('active'));
+  maskInput.value = '255.255.255.0';
   hideError();
+  calculate();
 }
 
+// ─── 결과 렌더 ──────────────────────────────────────────
 function renderResult(ipStr, ipLong, cidr, s) {
-  const panel = document.getElementById('resultPanel');
-  panel.classList.add('show');
+  document.getElementById('resultPanel').classList.add('show');
 
-  // 카드
   const grid = document.getElementById('resultGrid');
   grid.innerHTML = '';
   const cards = [
-    { label: 'CIDR 표기',      value: `${ipStr}/${cidr}`,      cls: 'highlight' },
-    { label: '서브넷 마스크',    value: longToIp(s.mask),         cls: '' },
-    { label: '와일드카드 마스크', value: longToIp(~s.mask >>> 0),  cls: '' },
-    { label: '네트워크 주소',    value: longToIp(s.network),      cls: 'green' },
-    { label: '브로드캐스트 주소', value: longToIp(s.broadcast),    cls: 'orange' },
-    { label: '첫 번째 호스트',   value: cidr < 31 ? longToIp(s.firstHost) : '(없음)', cls: '' },
-    { label: '마지막 호스트',    value: cidr < 31 ? longToIp(s.lastHost)  : '(없음)', cls: '' },
-    { label: '총 IP 수',        value: s.total.toLocaleString(), cls: '' },
-    { label: '사용 가능 호스트', value: s.usable.toLocaleString(), cls: 'purple' },
-    { label: '네트워크 비트',    value: `${cidr} bit`,            cls: '' },
-    { label: '호스트 비트',      value: `${32 - cidr} bit`,       cls: '' },
-    { label: '입력 IP (10진)',   value: ipLong >>> 0,             cls: '' },
+    { label: 'CIDR 표기',        value: `${ipStr}/${cidr}`,         cls: 'highlight' },
+    { label: '서브넷 마스크',      value: longToIp(s.mask),           cls: '' },
+    { label: '와일드카드 마스크',   value: longToIp(~s.mask >>> 0),    cls: '' },
+    { label: '네트워크 주소',      value: longToIp(s.network),        cls: 'green' },
+    { label: '브로드캐스트 주소',   value: longToIp(s.broadcast),      cls: 'orange' },
+    { label: '사용 가능 범위',     value: cidr < 31 ? `${longToIp(s.firstHost)} – ${longToIp(s.lastHost)}` : '(없음)', cls: '' },
+    { label: '총 IP 수',          value: s.total.toLocaleString(),   cls: '' },
+    { label: '사용 가능 호스트',    value: s.usable.toLocaleString(),  cls: 'pink' },
   ];
   for (const c of cards) {
     const div = document.createElement('div');
     div.className = `card ${c.cls}`;
-    div.innerHTML = `<div class="label">${c.label}</div><div class="value">${c.value}</div>`;
+    div.innerHTML = `<span class="copy-ico">⧉ 복사</span><div class="label">${c.label}</div><div class="value">${c.value}</div>`;
+    div.addEventListener('click', () => copy(c.value, c.label));
     grid.appendChild(div);
   }
 
-  // 비트맵
-  const maskBin = (s.mask >>> 0).toString(2).padStart(32, '0');
-  const bitmapRow = document.getElementById('bitmapRow');
-  const octetLabels = document.getElementById('octetLabels');
-  bitmapRow.innerHTML = '';
-  octetLabels.innerHTML = '';
+  // 정보 배지
+  document.getElementById('infoRow').innerHTML = `
+    <span class="info-badge">네트워크 비트 <strong>${cidr}</strong></span>
+    <span class="info-badge">호스트 비트 <strong>${32 - cidr}</strong></span>
+    <span class="info-badge">서브넷 범위 <strong>${longToIp(s.network)} ~ ${longToIp(s.broadcast)}</strong></span>
+  `;
 
+  // 비트맵
+  const ipBin = (ipLong >>> 0).toString(2).padStart(32, '0');
+  const maskBin = (s.mask >>> 0).toString(2).padStart(32, '0');
+  document.getElementById('ipBitLabel').textContent = ipStr;
+  document.getElementById('maskBitLabel').textContent = longToIp(s.mask);
+  renderBits('ipBits', ipBin, ipLong, cidr, true);
+  renderBits('maskBits', maskBin, s.mask, cidr, false);
+}
+
+function renderBits(elId, bin, long, cidr, isIp) {
+  const host = document.getElementById(elId);
+  host.innerHTML = '';
   for (let oct = 0; oct < 4; oct++) {
     const group = document.createElement('div');
     group.className = 'bit-group';
+    const octRow = document.createElement('div');
+    octRow.className = 'bit-octet';
     for (let b = 0; b < 8; b++) {
       const idx = oct * 8 + b;
+      const isNet = idx < cidr;
       const bit = document.createElement('div');
-      bit.className = `bit ${maskBin[idx] === '1' ? 'one' : 'zero'}`;
-      bit.textContent = maskBin[idx];
-      group.appendChild(bit);
-      // 라벨
-      const lbl = document.createElement('div');
-      lbl.className = 'octet-label';
-      lbl.textContent = maskBin[idx];
-      octetLabels.appendChild(lbl);
+      if (isIp) bit.className = `bit ${isNet ? 'ip-net' : 'ip-host'}`;
+      else      bit.className = `bit ${isNet ? 'm-net' : 'm-host'}`;
+      bit.textContent = bin[idx];
+      octRow.appendChild(bit);
     }
-    if (oct < 3) {
-      const gap = document.createElement('div');
-      gap.className = 'octet-label gap';
-      octetLabels.appendChild(gap);
-    }
-    bitmapRow.appendChild(group);
+    group.appendChild(octRow);
+    const dec = document.createElement('div');
+    dec.className = 'oct-dec';
+    dec.textContent = (long >>> (24 - oct * 8)) & 255;
+    group.appendChild(dec);
+    host.appendChild(group);
   }
-
-  // 정보 배지
-  const info = document.getElementById('infoRow');
-  info.innerHTML = `
-    <span class="info-badge">🔵 네트워크 비트: ${cidr}개 (파란색)</span>
-    <span class="info-badge">⚫ 호스트 비트: ${32 - cidr}개 (어두운색)</span>
-    <span class="info-badge">📡 서브넷 범위: ${longToIp(s.network)} ~ ${longToIp(s.broadcast)}</span>
-  `;
 }
 
-// ─── 전체 CIDR 표 생성 ──────────────────────────────────────
+// ─── 복사 + 토스트 ──────────────────────────────────────
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1600);
+}
+function copy(text, label) {
+  navigator.clipboard?.writeText(text).then(
+    () => toast(`✓ ${label} 복사됨 — ${text}`),
+    () => toast('복사에 실패했어요')
+  );
+}
+
+// ─── 참조표 ─────────────────────────────────────────────
 function classTag(cidr) {
   if (cidr <= 8)  return '<span class="tag tag-a">Class A</span>';
   if (cidr <= 16) return '<span class="tag tag-b">Class B</span>';
@@ -533,42 +540,39 @@ function classTag(cidr) {
   if (cidr === 32) return '<span class="tag tag-lo">Loopback</span>';
   return '<span class="tag tag-host">Host 분할</span>';
 }
-
 const tbody = document.getElementById('tableBody');
 for (let c = 0; c <= 32; c++) {
-  const mask     = cidrToMask(c);
-  const total    = Math.pow(2, 32 - c);
-  const usable   = c < 31 ? Math.max(0, total - 2) : total;
-  const pct      = Math.round((c / 32) * 100);
-
+  const mask = cidrToMask(c);
+  const total = Math.pow(2, 32 - c);
+  const usable = c < 31 ? Math.max(0, total - 2) : total;
+  const pct = Math.round((c / 32) * 100);
   const tr = document.createElement('tr');
   tr.dataset.cidr = c;
   tr.innerHTML = `
     <td><span class="cidr-badge">/${c}</span></td>
-    <td>${longToIp(mask)}</td>
+    <td style="color:var(--text);">${longToIp(mask)}</td>
     <td>${c}</td>
     <td>${32 - c}</td>
     <td>${total.toLocaleString()}</td>
     <td>${usable.toLocaleString()}</td>
-    <td>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%"></div></div>
-        <span style="color:#64748b;font-size:0.75rem;">${pct}%</span>
-      </div>
-    </td>
-    <td>${classTag(c)}</td>
-  `;
+    <td><div style="display:flex;align-items:center;gap:9px;">
+      <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%"></div></div>
+      <span style="color:var(--faint);font-size:0.74rem;">${pct}%</span>
+    </div></td>
+    <td>${classTag(c)}</td>`;
   tr.addEventListener('click', () => {
-    const ip = document.getElementById('ipInput').value.trim() || '192.168.1.100';
-    document.getElementById('ipInput').value = ip;
+    const ip = ipInput.value.trim() || '192.168.1.100';
+    ipInput.value = ip;
     cidrSelect.value = c;
-    document.getElementById('maskInput').value = longToIp(mask);
+    maskInput.value = longToIp(mask);
     calculate(ip, c);
+    document.getElementById('resultPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
   tbody.appendChild(tr);
 }
 
-// 초기 계산 실행
+// 초기 실행
+maskInput.value = '255.255.255.0';
 calculate('192.168.1.100', 24);
 </script>
 </body>
